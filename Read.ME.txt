@@ -1,0 +1,25 @@
+
+IL s'agit d'un projet de Librairies qui doit facilité le CRUD, le tri, 
+le filtre et la pagination des classes modèles de ses utilisateurs.
+
+Le projet global est subdivisé en 03:
+
+Un projet WebApplication: qui sera notre projet test sur nos controllers Api.
+
+Un projet de Librairie de test: pour nos tests unitaires. NB: vide pour l'instant. 
+
+Un projet LibrairieAPI : qui regroupe nos API. Nos controllers tests du projet WebApplication vont 
+ensuite en hériter pour accéder a toutes ses méthodes. 
+
+NB : Dans notre connterBaseAPI les methodes getAll() et getById() permettent de recupérer unique 
+les colonnes renseigné dans le champ fields.
+
+
+Pour tester le projet:
+
+-Créer une BD SQL Serveur
+-Changer la chaine de connexion
+-Faire un add-migration "nomdelamigration"
+-Ensuite un update-migration 
+
+ Enfin tester sur postman pour un rendu plus lisible
