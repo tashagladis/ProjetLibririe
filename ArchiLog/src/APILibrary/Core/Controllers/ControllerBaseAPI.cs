@@ -1,4 +1,5 @@
-﻿using APILibrary.Core.Models;
+﻿using APILibrary.Core.Extensions;
+using APILibrary.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
@@ -36,13 +37,13 @@ namespace APILibrary.Core.Attributs.Controllers
 
 
 
-        //[ProducesResponseType((int)HttpStatusCode.OK)]
-        //[HttpGet]
-        //public virtual async Task<ActionResult<IEnumerable<T>>> GetAllAsync()
-        //{
-        //    var results = await _context.Set<T>().ToListAsync();
-        //    return Ok(ToJsonList(results));
-        //}
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [HttpGet]
+        public virtual async Task<ActionResult<IEnumerable<T>>> GetAllAsync()
+        {
+            var results = await _context.Set<T>().ToListAsync();
+            return Ok(ToJsonList(results));
+        }
 
         //[ProducesResponseType((int)HttpStatusCode.OK)]
         //[ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -61,66 +62,184 @@ namespace APILibrary.Core.Attributs.Controllers
         //}
 
 
+        //[ProducesResponseType((int)HttpStatusCode.OK)]
+        //[HttpGet]
+        //public virtual async Task<ActionResult<IEnumerable<dynamic>>> GetAllAsync([FromQuery] string fields)
+        //{
+        //    //solutiuon 2
+        //    var tab = fields.Split(',');
+        //    var parameter = Expression.Parameter(typeof(T), "x");
+
+        //    var membersExpression = tab.Select(y => Expression.Property(parameter, y));
+
+        //    var membersAssignment = membersExpression.Select(z => Expression.Bind(z.Member, z));
+
+        //    var body = Expression.MemberInit(Expression.New(typeof(T)), membersAssignment);
+
+        //    var lambda = Expression.Lambda<Func<T, dynamic>>(body, parameter);
+
+        //    var query = _context.Set<T>().AsQueryable();
+
+        //    var results = await query.Select(lambda).ToListAsync();
+
+        //    //return result;
+
+        //    //var results = await _context.Set<T>().ToListAsync();
+        //    //solution 1
+        //    if (!string.IsNullOrWhiteSpace(fields))
+        //    {
+
+        //        var tabFields = fields.Split(',');
+        //        var tabNew = results.Select((x) =>
+        //        {
+        //            var expo = new ExpandoObject() as IDictionary<string, object>;
+        //            var collectionType = typeof(T);
+
+        //            foreach (var field in tabFields)
+        //            {
+        //                var prop = collectionType.GetProperty(field, BindingFlags.Public |
+        //                    BindingFlags.IgnoreCase | BindingFlags.Instance);
+        //                if (prop != null)
+        //                {
+        //                    //solution 1B
+        //                    /*var isPresentAttribute = prop.CustomAttributes
+        //                        .Any(x => x.AttributeType == typeof(NotJsonAttribute));
+        //                    if(!isPresentAttribute)*/
+        //                    expo.Add(prop.Name, prop.GetValue(x));
+        //                }
+        //                else
+        //                {
+        //                    throw new Exception($"Property {field} does not exist.");
+        //                }
+        //            }
+
+
+        //            return expo;
+        //        });
+        //        //solution 1A
+        //        return Ok(ToJsonList(tabNew));
+        //    }
+        //    //fin solution 1
+
+        //    return Ok(ToJsonList(results));
+        //}
+
+        //[ProducesResponseType((int)HttpStatusCode.OK)]
+        //[ProducesResponseType((int)HttpStatusCode.NotFound)]
+        //[HttpGet("{id}")]
+        //public virtual async Task<ActionResult<T>> GetById([FromRoute] int id, [FromQuery] string fields)
+        //{
+        //    //solution 2: optimisation de la requete SQL
+        //    var tab = new List<string>(fields.Split(','));
+        //    if (!tab.Contains("id"))
+        //        tab.Add("id");
+
+        //    var parameter = Expression.Parameter(typeof(T), "x");
+
+        //    var membersExpression = tab.Select(y => Expression.Property(parameter, y));
+
+        //    var membersAssignment = membersExpression.Select(z => Expression.Bind(z.Member, z));
+
+        //    var body = Expression.MemberInit(Expression.New(typeof(T)), membersAssignment);
+
+        //    var lambda = Expression.Lambda<Func<T, T>>(body, parameter);
+
+        //    var query = _context.Set<T>().AsQueryable();
+
+        //    var result = query.Select(lambda).SingleOrDefault(x => x.ID == id);
+
+
+        //    //return resultat;
+
+
+        //    //solution 1 : 
+        //    //T result = await _context.Set<T>().FindAsync(id);
+        //    if (result != null)
+        //    {
+
+        //        if (!string.IsNullOrWhiteSpace(fields))
+        //        {
+        //            var tabFields = fields.Split(',');
+
+        //            var expo = new ExpandoObject() as IDictionary<string, object>;
+        //            var modelType = typeof(T);
+
+        //            foreach (var field in tabFields)
+        //            {
+        //                var prop = modelType.GetProperty(field, BindingFlags.Public |
+        //                    BindingFlags.IgnoreCase | BindingFlags.Instance);
+        //                if (prop != null)
+        //                {
+        //                    //solution 1B
+        //                    /*var isPresentAttribute = prop.CustomAttributes
+        //                        .Any(x => x.AttributeType == typeof(NotJsonAttribute));
+        //                    if(!isPresentAttribute)*/
+        //                    expo.Add(prop.Name, prop.GetValue(result));
+        //                }
+        //                else
+        //                {
+        //                    throw new Exception($"Property {field} does not exist.");
+        //                }
+        //            }
+        //            //solution 1B
+        //            return Ok(ToJson(expo));
+        //        }
+        //        else
+        //            return Ok(ToJson(result));
+        //    }
+        //    else
+        //    {
+        //        return NotFound(new { Message = $"ID {id} not found" });
+        //    }
+        //}
+
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        [HttpGet]
-        public virtual async Task<ActionResult<IEnumerable<dynamic>>> GetAllAsync([FromQuery] string fields)
+        [HttpGet("sort")]
+        public virtual async Task<ActionResult<IEnumerable<dynamic>>> Sort([FromQuery] string fields, [FromQuery] string asc, [FromQuery] string desc)
         {
-            //solutiuon 2
-            var tab = fields.Split(',');
-            var parameter = Expression.Parameter(typeof(T), "x");
-
-            var membersExpression = tab.Select(y => Expression.Property(parameter, y));
-
-            var membersAssignment = membersExpression.Select(z => Expression.Bind(z.Member, z));
-
-            var body = Expression.MemberInit(Expression.New(typeof(T)), membersAssignment);
-
-            var lambda = Expression.Lambda<Func<T, dynamic>>(body, parameter);
-
             var query = _context.Set<T>().AsQueryable();
 
-            var results = await query.Select(lambda).ToListAsync();
-
-            //return result;
-
-            //var results = await _context.Set<T>().ToListAsync();
-            //solution 1
-            if (!string.IsNullOrWhiteSpace(fields))
+            if (!string.IsNullOrWhiteSpace(asc))
             {
+                var tab2 = asc.Split(',');
 
-                var tabFields = fields.Split(',');
-                var tabNew = results.Select((x) =>
-                {
-                    var expo = new ExpandoObject() as IDictionary<string, object>;
-                    var collectionType = typeof(T);
-
-                    foreach (var field in tabFields)
-                    {
-                        var prop = collectionType.GetProperty(field, BindingFlags.Public |
-                            BindingFlags.IgnoreCase | BindingFlags.Instance);
-                        if (prop != null)
-                        {
-                            //solution 1B
-                            /*var isPresentAttribute = prop.CustomAttributes
-                                .Any(x => x.AttributeType == typeof(NotJsonAttribute));
-                            if(!isPresentAttribute)*/
-                            expo.Add(prop.Name, prop.GetValue(x));
-                        }
-                        else
-                        {
-                            throw new Exception($"Property {field} does not exist.");
-                        }
-                    }
+                query = IQueryableExtensions.SelectColonnesAsc(query, tab2);
 
 
-                    return expo;
-                });
-                //solution 1A
-                return Ok(ToJsonList(tabNew));
+
             }
-            //fin solution 1
 
-            return Ok(ToJsonList(results));
+            if (!string.IsNullOrWhiteSpace(desc))
+                {
+                    var tab3 = desc.Split(',');
+
+                    query = IQueryableExtensions.SelectColonnesDesc(query, tab3);
+
+
+
+                }
+
+
+
+            if (!string.IsNullOrWhiteSpace(fields))
+                {
+                    var tab1 = fields.Split(',');
+
+                    // var results = await IQueryableExtensions.SelectDynamic<TModel>(query, tab).ToListAsync();
+                    var results = await query.SelectModel(tab1).ToListAsync();
+                        return results.Select((x) => IQueryableExtensions.SelectObject(x, tab1)).ToList();
+                
+                    // toujours penser a faire le select a la fin
+                    return await query.ToListAsync();
+
+
+
+                }
+                else
+                {
+                    return Ok(ToJsonList(await query.ToListAsync()));
+                }
+
         }
 
         [ProducesResponseType((int)HttpStatusCode.OK)]
@@ -128,70 +247,92 @@ namespace APILibrary.Core.Attributs.Controllers
         [HttpGet("{id}")]
         public virtual async Task<ActionResult<T>> GetById([FromRoute] int id, [FromQuery] string fields)
         {
-            //solution 2: optimisation de la requete SQL
-            var tab = new List<string>(fields.Split(','));
-            if (!tab.Contains("id"))
-                tab.Add("id");
-
-            var parameter = Expression.Parameter(typeof(T), "x");
-
-            var membersExpression = tab.Select(y => Expression.Property(parameter, y));
-
-            var membersAssignment = membersExpression.Select(z => Expression.Bind(z.Member, z));
-
-            var body = Expression.MemberInit(Expression.New(typeof(T)), membersAssignment);
-
-            var lambda = Expression.Lambda<Func<T, T>>(body, parameter);
-
             var query = _context.Set<T>().AsQueryable();
+            //solution 2: optimisation de la requete SQL
 
-            var result = query.Select(lambda).SingleOrDefault(x => x.ID == id);
-
-
-            //return resultat;
-
-
-            //solution 1 : 
-            //T result = await _context.Set<T>().FindAsync(id);
-            if (result != null)
+            if (!string.IsNullOrWhiteSpace(fields))
             {
-
-                if (!string.IsNullOrWhiteSpace(fields))
+                var tab = new List<string>(fields.Split(','));
+                if (!tab.Contains("id"))
+                    tab.Add("id");
+                var result = query.SelectModel(tab.ToArray()).SingleOrDefault(x => x.ID == id);
+                if (result != null)
                 {
                     var tabFields = fields.Split(',');
-
-                    var expo = new ExpandoObject() as IDictionary<string, object>;
-                    var modelType = typeof(T);
-
-                    foreach (var field in tabFields)
-                    {
-                        var prop = modelType.GetProperty(field, BindingFlags.Public |
-                            BindingFlags.IgnoreCase | BindingFlags.Instance);
-                        if (prop != null)
-                        {
-                            //solution 1B
-                            /*var isPresentAttribute = prop.CustomAttributes
-                                .Any(x => x.AttributeType == typeof(NotJsonAttribute));
-                            if(!isPresentAttribute)*/
-                            expo.Add(prop.Name, prop.GetValue(result));
-                        }
-                        else
-                        {
-                            throw new Exception($"Property {field} does not exist.");
-                        }
-                    }
-                    //solution 1B
-                    return Ok(ToJson(expo));
+                    return Ok(IQueryableExtensions.SelectObject(result, tabFields));
                 }
                 else
-                    return Ok(ToJson(result));
+                {
+                    return NotFound(new { Message = $"ID {id} not found" });
+                }
             }
             else
             {
-                return NotFound(new { Message = $"ID {id} not found" });
+                var result = query.SingleOrDefault(x => x.ID == id);
+                if (result != null)
+                {
+
+                    return Ok(ToJson(result));
+                }
+                else
+                {
+                    return NotFound(new { Message = $"ID {id} not found" });
+                }
             }
         }
 
+
+
+
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpGet("search")]
+        public virtual async Task<ActionResult<T>> Search( [FromQuery] string lastname, [FromQuery] string genre, [FromQuery] string sort)
+        {
+            var query = _context.Set<T>().AsQueryable();
+            //solution 2: optimisation de la requete SQL
+
+            if (!string.IsNullOrWhiteSpace(lastname))
+            {
+  
+                    //var tab1 = lastname.Split(',');
+                  
+                        if (lastname.StartsWith("*") && lastname.EndsWith("*"))
+                        {
+                    //&& lastname.EndsWith("*")
+                    query = IQueryableExtensions.SelectColonnesName(query, "lastname", lastname);
+                        }
+                        else
+                        {
+                            return NotFound(new { Message = $"Le lastname {lastname} doit etre encadré par des *" });
+                        }
+                
+
+                    if (!string.IsNullOrWhiteSpace(genre))
+                    {
+                        var tab3 = genre.Split(',');
+                       
+                            query = IQueryableExtensions.SelectColonnesGender (query, "genre", tab3);
+                        
+
+                    }
+                    if (!string.IsNullOrWhiteSpace(sort))
+                    {
+                        var tab2 = sort.Split(',');
+
+                        query = IQueryableExtensions.SelectColonnesAsc(query, tab2);
+                    
+
+
+                    }
+
+                    return Ok(ToJsonList(await query.ToListAsync()));
+         }
+        else
+        {
+            return NotFound(new { Message = $"name {lastname} not found" });
+        }
+    }
 
 
 

@@ -23,3 +23,16 @@ Pour tester le projet:
 -Ensuite un update-migration 
 
  Enfin tester sur postman pour un rendu plus lisible
+
+Mise a jour 24/11/2020
+
+-Le tri qui va permettre de faire un tri sur des colonnes dans l'ordre croissant ou decroissant
+
+Ex : https://localhost:5001/api/customer/sort?asc=firstname,lastname
+ou
+https://localhost:5001/api/customer/search?desc=firstname,id
+
+-La recherche qui va chercher un élément a partir de son latsname et qui va selon votre choix trier 
+des colonnes dans l'ordre croissant et aussi en fonction de son genre
+
+Ex : https://localhost:5001/api/customer/search?lastname=*Charles*&genre=autres,femme

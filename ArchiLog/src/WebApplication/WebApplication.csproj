@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\APILibrary.Test\APILibrary.Test.csproj" />
     <ProjectReference Include="..\APILibrary\APILibrary.csproj" />
   </ItemGroup>
 
