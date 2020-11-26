@@ -102,6 +102,27 @@ namespace APILibrary.Core.Extensions
 
         }
 
+        public static IQueryable<T> SelectColonnesAscOne<T>(IQueryable<T> query, string field) where T : ModelBase
+        {
+
+            //lamba 2
+            var parameter = Expression.Parameter(typeof(T));
+            var property = Expression.Property(parameter, field);
+            // Créer une propriétée
+            var body = Expression.Convert(property, typeof(object));
+
+            var lambda = Expression.Lambda<Func<T, object>>(body, parameter);
+
+
+
+            return query.OrderBy(lambda);
+            // thenBy Pour la deuxième colonne
+
+
+
+
+        }
+
 
 
         public static IQueryable<T> SelectColonnesDesc<T>(IQueryable<T> query, string[] field) where T : ModelBase
@@ -129,23 +150,52 @@ namespace APILibrary.Core.Extensions
 
         }
 
+        public static IQueryable<T> SelectColonnesDescOne<T>(IQueryable<T> query, string field) where T : ModelBase
+        {
+
+            //lambda1
+            var parameter = Expression.Parameter(typeof(T));
+            var property = Expression.Property(parameter, field);
+            var body = Expression.Convert(property, typeof(object));
+
+            var lambda = Expression.Lambda<Func<T, object>>(body, parameter);
+
+            
+
+            // appel de mes deux lambdas
+
+            return query.OrderByDescending(lambda);
+            //thenBy Pour la deuxième colonne
+
+
+        }
+
 
         public static IQueryable<T> SelectColonnesName<T>(IQueryable<T> query, string field, string value) where T : ModelBase
         {
-                // J'extrait ma chaine de caractère pour vérifier pour testé sa valeur
-                  //var valueOut = value.StartsWith("*") ? value.Substring(1) : value;
-                  //valueOut = valueOut.EndsWith("*") ? value.Substring(0, valueOut.Length - 1) : valueOut;
+            //J'extrait ma chaine de caractère pour vérifier pour testé sa valeur
+                  var valueOut = value.StartsWith("*") ? value.Substring(1) : value;
+                  valueOut = valueOut.EndsWith("*") ? valueOut.Substring(0, valueOut.Length - 1) : valueOut;
                 //: value.EndsWith("*") ? value.Substring(0, value.Length - 1)
-                 var valueOut = value.Replace("*", "");
+                 //var valueOut = value.Replace("*", "");
 
                  var parameter = Expression.Parameter(typeof(T));
                 // Accéder a la propriété de type field
                 var property = Expression.Property(parameter, field);
                 Expression val = Expression.Constant(valueOut);
                 //transformer la valeur value en Expression
-                var body = Expression.Equal(property, val);
+               // var body = Expression.Equal(property, val);
 
-                var lambda = Expression.Lambda<Func<T, bool>>(body, parameter);
+                var body = Expression.Equal(Expression.Call(property, typeof(String).GetMethods()
+                    .Where(x => x.Name == "Contains")
+                                     .FirstOrDefault(x=> x.GetParameters().Length == 1),
+                    new Expression[] { val }),  Expression.Constant(true));
+
+            // On appel la méthode contains on lui passe val pour vérifier si notre colonne property contient un élément avec val
+            //ensuite on vérifie si le resultat de notre Expression.call est égale a true
+            
+
+            var lambda = Expression.Lambda<Func<T, bool>>(body, parameter);
                 return query.Where(lambda);
 
         }
@@ -189,8 +239,27 @@ namespace APILibrary.Core.Extensions
 
         }
 
+        public static IQueryable<T> SelectColonnesGenderOne<T>(IQueryable<T> query, string field, string value) where T : ModelBase
+        {
+
+            // lambada 1
+            var parameter = Expression.Parameter(typeof(T));
+            var property = Expression.Property(parameter, field);
+            // Accéder a la propriété de type field
+
+            // Expression PropOb = Expression.Convert(property, typeof(object));
+
+            Expression val = Expression.Constant(value);
+            //transformer la valeur value en Expression
+
+            var body = Expression.Equal(property, val);
+
+            var lambdaAll = Expression.Lambda<Func<T, bool>>(body, parameter);
+
+            return query.Where(lambdaAll);
 
 
+        }
 
     }
 }

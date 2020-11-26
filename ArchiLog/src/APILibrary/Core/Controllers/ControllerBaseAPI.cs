@@ -202,8 +202,16 @@ namespace APILibrary.Core.Attributs.Controllers
             if (!string.IsNullOrWhiteSpace(asc))
             {
                 var tab2 = asc.Split(',');
+                //on verifie si on a deux éléments dans le tableau pour savoir si on va faire le thenBy()
 
-                query = IQueryableExtensions.SelectColonnesAsc(query, tab2);
+                if (tab2.Length == 1)
+                {
+                    query = IQueryableExtensions.SelectColonnesAscOne(query, tab2[0]);
+                }
+                else
+                {
+                    query = IQueryableExtensions.SelectColonnesAsc(query, tab2);
+                }
 
 
 
@@ -212,8 +220,16 @@ namespace APILibrary.Core.Attributs.Controllers
             if (!string.IsNullOrWhiteSpace(desc))
                 {
                     var tab3 = desc.Split(',');
+                //on verifie si on a deux éléments dans le tableau pour savoir si on va faire le thenBy()
 
+                if (tab3.Length == 1)
+                {
+                    query = IQueryableExtensions.SelectColonnesDescOne(query, tab3[0]);
+                }
+                else
+                {
                     query = IQueryableExtensions.SelectColonnesDesc(query, tab3);
+                }
 
 
 
@@ -296,10 +312,9 @@ namespace APILibrary.Core.Attributs.Controllers
             {
   
                     //var tab1 = lastname.Split(',');
-                  
+                        //Verfie si la valeur entré commence et fini bien par *
                         if (lastname.StartsWith("*") && lastname.EndsWith("*"))
                         {
-                    //&& lastname.EndsWith("*")
                     query = IQueryableExtensions.SelectColonnesName(query, "lastname", lastname);
                         }
                         else
@@ -311,8 +326,16 @@ namespace APILibrary.Core.Attributs.Controllers
                     if (!string.IsNullOrWhiteSpace(genre))
                     {
                         var tab3 = genre.Split(',');
-                       
-                            query = IQueryableExtensions.SelectColonnesGender (query, "genre", tab3);
+                    //  //on verifie si on a deux éléments dans le tableau pour savoir si on va faire le expression.or()
+
+                    if (tab3.Length == 1)
+                    {
+                        query = IQueryableExtensions.SelectColonnesGenderOne(query, "genre", tab3[0]);
+                    }
+                    else
+                    {
+                        query = IQueryableExtensions.SelectColonnesGender(query, "genre", tab3);
+                    }
                         
 
                     }
