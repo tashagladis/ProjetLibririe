@@ -217,6 +217,7 @@ namespace APILibrary.Core.Attributs.Controllers
 
             }
 
+
             if (!string.IsNullOrWhiteSpace(desc))
                 {
                     var tab3 = desc.Split(',');
@@ -233,7 +234,8 @@ namespace APILibrary.Core.Attributs.Controllers
 
 
 
-                }
+            }
+            
 
 
 
@@ -312,9 +314,10 @@ namespace APILibrary.Core.Attributs.Controllers
             {
   
                     //var tab1 = lastname.Split(',');
-                        //Verfie si la valeur entré commence et fini bien par *
+                  
                         if (lastname.StartsWith("*") && lastname.EndsWith("*"))
                         {
+                    //&& lastname.EndsWith("*")
                     query = IQueryableExtensions.SelectColonnesName(query, "lastname", lastname);
                         }
                         else
@@ -371,7 +374,7 @@ namespace APILibrary.Core.Attributs.Controllers
                 _context.Add(item);
                 await _context.SaveChangesAsync();
 
-                return item;
+                return Ok(item);
             }
             else
             {
@@ -425,10 +428,11 @@ namespace APILibrary.Core.Attributs.Controllers
 
             _context.Remove<T>(item);
 
+
             try
             {
                 await _context.SaveChangesAsync();
-                return NoContent();
+                return Ok(ToJsonList(await _context.Set<T>().ToListAsync()));
             }
             catch (Exception e)
             {
