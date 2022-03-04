@@ -8,17 +8,19 @@ using System.Threading.Tasks;
 
 namespace WebApplication.Models
 {
-    public class Pizza : ModelBase
+    public class Message : ModelBase
     {
+      
+        public string Text { get; set; }   
 
+        public int RecieverId { get; set; }
 
-        //[Key]
-        //public int ID { get; set; }
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public string Topping { get; set; }
+        [ForeignKey("RecieverId")]
+        public RegisterModel Reciever { get; set; }
+
         [DataType(DataType.Date)]
         [Column(TypeName = "Date")]
-        public DateTime DateCreation { get; set; }
+        public DateTime Date { get; set; }
+
     }
 }
