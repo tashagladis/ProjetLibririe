@@ -10,8 +10,8 @@ using WebApplication.Data;
 namespace WebApplication.Migrations
 {
     [DbContext(typeof(HeyYouDbContext))]
-    [Migration("20220304104639_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20220304201225_deux")]
+    partial class deux
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -258,15 +258,16 @@ namespace WebApplication.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("Date");
 
-                    b.Property<int>("RecieverId")
-                        .HasColumnType("int");
+                    b.Property<string>("Reciever")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sender")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("RecieverId");
 
                     b.ToTable("Messages");
                 });
@@ -309,9 +310,15 @@ namespace WebApplication.Migrations
                     b.Property<string>("Lastname")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -381,17 +388,6 @@ namespace WebApplication.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("WebApplication.Models.Message", b =>
-                {
-                    b.HasOne("WebApplication.Models.RegisterModel", "Reciever")
-                        .WithMany()
-                        .HasForeignKey("RecieverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Reciever");
                 });
 
             modelBuilder.Entity("WebApplication.Models.RegisterModel", b =>

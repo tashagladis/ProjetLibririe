@@ -13,10 +13,9 @@ namespace WebApplication.Models
       
         public string Text { get; set; }   
 
-        public int RecieverId { get; set; }
+        public string Reciever { get; set; }
 
-        [ForeignKey("RecieverId")]
-        public RegisterModel Reciever { get; set; }
+        public string Sender { get; set; }
 
         [DataType(DataType.Date)]
         [Column(TypeName = "Date")]

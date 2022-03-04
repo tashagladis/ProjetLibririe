@@ -1,4 +1,5 @@
 ﻿using APILibrary.Core.Attributs.Controllers;
+using GoogleMaps.LocationServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -87,22 +88,51 @@ namespace WebApplication.Controllers
                 UserName= model.Login
             };
 
-            if(user != null)
+          
+          
+             var result = await userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
             {
+                //var address = model.Address + " " + model.ZipCode + model.City;
+                //var coords = Geodecode(address);
+
+                //model.Latitude = coords["latitude"];
+                //model.Longitude = coords["longitude"];
+
                 if (ModelState.IsValid)
                 {
                     _context.Add(model);
-                    await _context.SaveChangesAsync();                
+                    await _context.SaveChangesAsync();
                 }
-               
+
             }
-          
-             var result = await userManager.CreateAsync(user, model.Password);                     
 
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
+        public Dictionary<string, double> Geodecode(string address)
+        {
+            var locationService = new GoogleLocationService();
+            var point = locationService.GetLatLongFromAddress(address);
+
+            var latitude = point.Latitude;
+            var longitude = point.Longitude;
+
+            
+
+            Dictionary<string, double> coords = new Dictionary<string, double>();
+
+            coords.Add("latitude", latitude);
+            coords.Add("longitude", longitude);
+         
+            return coords;
+
+
+        }
     }
-}
+
+      
+    }

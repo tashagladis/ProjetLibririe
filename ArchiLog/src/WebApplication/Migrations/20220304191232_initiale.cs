@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WebApplication.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class initiale : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -61,6 +61,22 @@ namespace WebApplication.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Events", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RecieverId = table.Column<int>(type: "int", nullable: false),
+                    SenderId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "Date", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -187,6 +203,8 @@ namespace WebApplication.Migrations
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Login = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Latitude = table.Column<double>(type: "float", nullable: true),
+                    Longitude = table.Column<double>(type: "float", nullable: true),
                     EventID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -198,27 +216,6 @@ namespace WebApplication.Migrations
                         principalTable: "Events",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Messages",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RecieverId = table.Column<int>(type: "int", nullable: false),
-                    Date = table.Column<DateTime>(type: "Date", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Messages", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Messages_RegisterModels_RecieverId",
-                        column: x => x.RecieverId,
-                        principalTable: "RegisterModels",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -261,11 +258,6 @@ namespace WebApplication.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_RecieverId",
-                table: "Messages",
-                column: "RecieverId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RegisterModels_EventID",
                 table: "RegisterModels",
                 column: "EventID");
@@ -292,13 +284,13 @@ namespace WebApplication.Migrations
                 name: "Messages");
 
             migrationBuilder.DropTable(
+                name: "RegisterModels");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "RegisterModels");
 
             migrationBuilder.DropTable(
                 name: "Events");
