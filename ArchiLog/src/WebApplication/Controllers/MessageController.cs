@@ -21,15 +21,14 @@ namespace WebApplication.Controllers
         {
 
         }
-
-       
+     
         [HttpPost("send/{receiver}")]
         public virtual async Task<ActionResult<Message>> SendMessage([FromRoute] string receiver, [FromBody] Message item)
         {
             if (ModelState.IsValid)
             {
                 if(receiver == null)
-                    return BadRequest(new { Message = $"Id ne doit pas etre null" });
+                    return BadRequest(new { Message = $"Id ne doit pas être null" });
 
                 item.Reciever = receiver;
 
@@ -37,7 +36,7 @@ namespace WebApplication.Controllers
                 var sender = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
 
                 if (sender  == null)
-                    return BadRequest(new { Message = $"Vous n'etes peut etre pas connecté" });
+                    return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
 
                 item.Sender= sender;
                 item.Date = DateTime.Now;

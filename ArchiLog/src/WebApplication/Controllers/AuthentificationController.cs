@@ -5,10 +5,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -94,11 +98,18 @@ namespace WebApplication.Controllers
 
             if (result.Succeeded)
             {
-                //var address = model.Address + " " + model.ZipCode + model.City;
-                //var coords = Geodecode(address);
+                try
+                {
+                    var address = model.Address + " " + model.ZipCode + " " + model.City;
+                    var coords = Geodecode(address);
 
-                //model.Latitude = coords["latitude"];
-                //model.Longitude = coords["longitude"];
+                    model.Latitude = coords["latitude"];
+                    model.Longitude = coords["longitude"];
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex);
+                }
 
                 if (ModelState.IsValid)
                 {
@@ -113,26 +124,110 @@ namespace WebApplication.Controllers
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
+
+
         public Dictionary<string, double> Geodecode(string address)
         {
-            var locationService = new GoogleLocationService();
-            var point = locationService.GetLatLongFromAddress(address);
+            var root = new RootObject();
 
-            var latitude = point.Latitude;
-            var longitude = point.Longitude;
+            string url = "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyBBZfV6j-1JJ3c10NxSAicbCsYDQWgPAmc&address=" + address + "&sensor=true";
+            var req = (HttpWebRequest)WebRequest.Create(url);
 
-            
+            var res = (HttpWebResponse)req.GetResponse();
+
+            using (var streamreader = new StreamReader(res.GetResponseStream()))
+            {
+                var result = streamreader.ReadToEnd();
+
+                if (!string.IsNullOrWhiteSpace(result))
+                {
+                    root = JsonConvert.DeserializeObject<RootObject>(result);
+                }
+            }
+         
+            var latitude = Convert.ToString(root.results[0].geometry.location.lat, CultureInfo.InvariantCulture);
+            var longitude = Convert.ToString(root.results[0].geometry.location.lng, CultureInfo.InvariantCulture);
 
             Dictionary<string, double> coords = new Dictionary<string, double>();
 
-            coords.Add("latitude", latitude);
-            coords.Add("longitude", longitude);
+            coords.Add("latitude", double.Parse(latitude, System.Globalization.CultureInfo.InvariantCulture));
+            coords.Add("longitude",double.Parse(longitude, System.Globalization.CultureInfo.InvariantCulture));
          
             return coords;
 
 
         }
     }
-
-      
+    public class AddressComponent
+    {
+        public string long_name { get; set; }
+        public string short_name { get; set; }
+        public List<string> types { get; set; }
     }
+
+    public class Northeast
+    {
+        public double lat { get; set; }
+        public double lng { get; set; }
+    }
+
+    public class Southwest
+    {
+        public double lat { get; set; }
+        public double lng { get; set; }
+    }
+
+    public class Bounds
+    {
+        public Northeast northeast { get; set; }
+        public Southwest southwest { get; set; }
+    }
+
+    public class Location
+    {
+        public double lat { get; set; }
+        public double lng { get; set; }
+    }
+
+    public class Northeast2
+    {
+        public double lat { get; set; }
+        public double lng { get; set; }
+    }
+
+    public class Southwest2
+    {
+        public double lat { get; set; }
+        public double lng { get; set; }
+    }
+
+    public class Viewport
+    {
+        public Northeast2 northeast { get; set; }
+        public Southwest2 southwest { get; set; }
+    }
+
+    public class Geometry
+    {
+        public Bounds bounds { get; set; }
+        public Location location { get; set; }
+        public string location_type { get; set; }
+        public Viewport viewport { get; set; }
+    }
+
+    public class Result
+    {
+        public List<AddressComponent> address_components { get; set; }
+        public string formatted_address { get; set; }
+        public Geometry geometry { get; set; }
+        public string place_id { get; set; }
+        public List<string> types { get; set; }
+    }
+
+    public class RootObject
+    {
+        public List<Result> results { get; set; }
+        public string status { get; set; }
+    }
+
+}
