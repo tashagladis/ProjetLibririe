@@ -15,6 +15,8 @@ namespace WebApplication.Models
 
         public string Reciever { get; set; }
 
+        public RegisterModel user { get; set; }
+
         public string Sender { get; set; }
 
         [DataType(DataType.Date)]

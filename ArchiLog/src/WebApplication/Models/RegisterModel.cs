@@ -39,8 +39,6 @@ namespace WebApplication.Models
         [Required(ErrorMessage = "City is required")]
         public string City { get; set; }
 
-        public string Image { get; set; }
-
         [Required(ErrorMessage = "Login is required")]
         public string Login { get; set; }
 
@@ -50,5 +48,11 @@ namespace WebApplication.Models
         public double? Latitude { get; set; }
 
         public double? Longitude { get; set; }
+
+        public string ImageType { get; set; }
+
+        public string ImageBasePath { get; set; }
+
+       
     }
 }

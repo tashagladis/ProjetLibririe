@@ -38,6 +38,9 @@ namespace WebApplication.Controllers
                 if (sender  == null)
                     return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
 
+               // var results = await _context.Set<RegisterModel>()
+               //.Where(item => (item.Login == 
+
                 item.Sender= sender;
                 item.Date = DateTime.Now;
 
@@ -52,6 +55,27 @@ namespace WebApplication.Controllers
             }
         }
 
+        [HttpGet("getmessages/{user}")]
+        public virtual async Task<ActionResult<IEnumerable<Message>>> GetMessage([FromRoute] string user)
+        {
+                if (user == null)
+                    return BadRequest(new { Message = $"Id ne doit pas être null" });               
+
+                var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (me == null)
+                    return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
+
+                var results = await _context.Set<Message>()
+                .Where(item =>  (item.Reciever == me && item.Sender == user)
+                                 || (item.Reciever == user && item.Sender == me))
+                 .ToListAsync();
+
+                return Ok(ToJsonList(results));           
+        }
+
+
         [HttpGet("messages")]
         public virtual async Task<ActionResult<IEnumerable<Message>>> Messages()
         {
@@ -59,10 +83,65 @@ namespace WebApplication.Controllers
             var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
 
             var results = await _context.Set<Message>()
-                .Where(item => item.Reciever == me)
+                .Where(item => item.Reciever == me || item.Sender == me)
                 .ToListAsync();
 
             return Ok(ToJsonList(results));
         }
-     }
+
+
+        [HttpGet("users")]
+        public virtual List<string> ListOfUsers()
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+            var results =  _context.Set<Message>()
+                .Where(item => item.Reciever == me || item.Sender == me)
+                .ToList();
+
+            List<string> users = new List<string>();
+
+            foreach(var message in results)
+            {
+                message.Sender = message.Sender.ToLower();
+
+                //Verifier si l'élément est different de celui connecté
+                if (message.Sender != me)
+                {
+                    //Verifier si l'élément n'est pas dans la liste avant de l'ajouter
+                    if (users != null)
+                    {
+                        if (!users.Any(s => s == message.Sender || s == message.Reciever))
+                        {
+                            users.Add(message.Sender);
+                        }
+                    }
+                    else
+                    {
+                        users.Add(message.Sender);
+                    }
+                }
+
+                if (message.Reciever != me)
+                {
+                    if (users != null)
+                    {
+                        if (!users.Any(s => s == message.Sender || s == message.Reciever))
+                        {
+                            users.Add(message.Reciever);
+                        }
+                    }
+                    else 
+                    {
+                        users.Add(message.Reciever);
+                    }
+                    
+                }
+
+            }
+
+            return users;
+        }
+    }
 }

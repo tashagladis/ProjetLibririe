@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication.Data;
 
 namespace WebApplication.Migrations
 {
     [DbContext(typeof(HeyYouDbContext))]
-    partial class HeyYouDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220324102323_huit")]
+    partial class huit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,6 +152,21 @@ namespace WebApplication.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("RegisterModelRegisterModel", b =>
+                {
+                    b.Property<int>("DemandsID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FriendsID")
+                        .HasColumnType("int");
+
+                    b.HasKey("DemandsID", "FriendsID");
+
+                    b.HasIndex("FriendsID");
+
+                    b.ToTable("RegisterModelRegisterModel");
+                });
+
             modelBuilder.Entity("WebApplication.Authentification.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -246,47 +263,6 @@ namespace WebApplication.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("WebApplication.Models.Friend", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Friends");
-                });
-
-            modelBuilder.Entity("WebApplication.Models.Link", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("FriendID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageBasePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("FriendID");
-
-                    b.ToTable("Link");
-                });
-
             modelBuilder.Entity("WebApplication.Models.Message", b =>
                 {
                     b.Property<int>("ID")
@@ -345,16 +321,10 @@ namespace WebApplication.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FriendID")
-                        .HasColumnType("int");
-
                     b.Property<string>("Genre")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageBasePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageType")
+                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Lastname")
@@ -385,8 +355,6 @@ namespace WebApplication.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("EventID");
-
-                    b.HasIndex("FriendID");
 
                     b.ToTable("RegisterModels");
                 });
@@ -442,11 +410,19 @@ namespace WebApplication.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebApplication.Models.Link", b =>
+            modelBuilder.Entity("RegisterModelRegisterModel", b =>
                 {
-                    b.HasOne("WebApplication.Models.Friend", null)
-                        .WithMany("Friends")
-                        .HasForeignKey("FriendID");
+                    b.HasOne("WebApplication.Models.RegisterModel", null)
+                        .WithMany()
+                        .HasForeignKey("DemandsID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebApplication.Models.RegisterModel", null)
+                        .WithMany()
+                        .HasForeignKey("FriendsID")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebApplication.Models.Message", b =>
@@ -463,22 +439,11 @@ namespace WebApplication.Migrations
                     b.HasOne("WebApplication.Models.Event", null)
                         .WithMany("EventUsers")
                         .HasForeignKey("EventID");
-
-                    b.HasOne("WebApplication.Models.Friend", null)
-                        .WithMany("Demands")
-                        .HasForeignKey("FriendID");
                 });
 
             modelBuilder.Entity("WebApplication.Models.Event", b =>
                 {
                     b.Navigation("EventUsers");
-                });
-
-            modelBuilder.Entity("WebApplication.Models.Friend", b =>
-                {
-                    b.Navigation("Demands");
-
-                    b.Navigation("Friends");
                 });
 #pragma warning restore 612, 618
         }

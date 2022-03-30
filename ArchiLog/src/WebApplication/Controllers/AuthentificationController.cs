@@ -91,10 +91,9 @@ namespace WebApplication.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName= model.Login
             };
-
-          
-          
+                 
              var result = await userManager.CreateAsync(user, model.Password);
+
 
             if (result.Succeeded)
             {

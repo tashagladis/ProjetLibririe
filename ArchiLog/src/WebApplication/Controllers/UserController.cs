@@ -1,21 +1,147 @@
 ﻿using APILibrary.Core.Attributs.Controllers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApplication.Data;
 using WebApplication.Models;
 
 namespace WebApplication.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
+
     public class UserController : ControllerBaseAPI<RegisterModel, HeyYouDbContext>
     {
         public UserController(HeyYouDbContext context) : base(context)
         {
 
         }
+
+        [HttpPost("add/{user}")]
+        public virtual async Task<ActionResult<Message>> AddUser([FromRoute] string user)
+        {
+            if (user == null)
+                return BadRequest(new { Message = $"User ne doit pas être null" });
+
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var login = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (login == null)
+                return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
+
+            var userFind = _context.Set<RegisterModel>().FirstOrDefault(item => item.Login == user);
+
+            var me = _context.Set<Friend>().FirstOrDefault(item => item.Username == login);
+
+
+            if (me == null)
+            {
+                me = new Friend();
+                var userToAdd = new Link();
+                userToAdd.Name = userFind.Login;
+                me.Friends.Add(userToAdd);
+                me.Demands.Remove(userFind);
+                _context.Add(me);
+                await _context.SaveChangesAsync();
+                return Ok(me);
+            }
+            else
+            {
+                var userToAdd = new Link();
+                userToAdd.Name = userFind.Login;
+                me.Friends.Add(userToAdd);
+                me.Demands.Remove(userFind);
+                await _context.SaveChangesAsync();
+
+            }
+
+            return Ok(me);
+        }
+
+
+
+        [HttpGet("friends")]
+        public virtual async Task<ActionResult<RegisterModel>> GetFriends()
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (me == null)
+                return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
+
+            var results = _context.Set<Friend>()
+                 .Where(item => item.Username == me)
+                .Select(item => new { friends = item.Friends });
+
+            return Ok(results);
+        }
+
+
+
+        [HttpPost("invit/{user}")]
+        public virtual async Task<ActionResult<Message>> AskUser([FromRoute] string user)
+        {
+
+            if (user == null)
+                return BadRequest(new { Message = $"User ne doit pas être null" });
+
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var login = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (login == null)
+                return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
+
+            var userFind = _context.Set<RegisterModel>().FirstOrDefault(item => item.Login == user);
+
+            var me = _context.Set<RegisterModel>().FirstOrDefault(item => item.Login == login);
+
+            var friend = _context.Set<Friend>().FirstOrDefault(item => item.Username == user);
+
+            if(friend == null)
+            {
+                friend = new Friend();
+                friend.Username = user;
+                friend.Demands.Add(me);
+                _context.Add(friend);
+                await _context.SaveChangesAsync();
+
+                return Ok(friend);
+
+            }   
+            if (userFind != null)
+            {
+                friend.Demands.Add(me);
+            }
+            await _context.SaveChangesAsync();
+
+            return Ok(friend);
+        }
+
+
+
+        [HttpGet("invitations")]
+        public virtual async Task<ActionResult<RegisterModel>> GetInvitations()
+        {
+
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (me == null)
+                return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
+
+            var results = _context.Set<Friend>()
+                .Where(item => item.Username == me)
+                .Select(item => new { invitations = item.Demands });
+
+            return Ok(results);
+        }
+
+
+
     }
 }

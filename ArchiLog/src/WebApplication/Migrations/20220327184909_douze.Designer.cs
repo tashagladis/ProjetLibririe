@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication.Data;
 
 namespace WebApplication.Migrations
 {
     [DbContext(typeof(HeyYouDbContext))]
-    partial class HeyYouDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220327184909_douze")]
+    partial class douze
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,32 +263,6 @@ namespace WebApplication.Migrations
                     b.ToTable("Friends");
                 });
 
-            modelBuilder.Entity("WebApplication.Models.Link", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("FriendID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageBasePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("FriendID");
-
-                    b.ToTable("Link");
-                });
-
             modelBuilder.Entity("WebApplication.Models.Message", b =>
                 {
                     b.Property<int>("ID")
@@ -351,10 +327,7 @@ namespace WebApplication.Migrations
                     b.Property<string>("Genre")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageBasePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageType")
+                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Lastname")
@@ -381,6 +354,9 @@ namespace WebApplication.Migrations
                     b.Property<string>("ZipCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("imageBasePath")
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("ID");
 
@@ -442,13 +418,6 @@ namespace WebApplication.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebApplication.Models.Link", b =>
-                {
-                    b.HasOne("WebApplication.Models.Friend", null)
-                        .WithMany("Friends")
-                        .HasForeignKey("FriendID");
-                });
-
             modelBuilder.Entity("WebApplication.Models.Message", b =>
                 {
                     b.HasOne("WebApplication.Models.RegisterModel", "user")
@@ -477,8 +446,6 @@ namespace WebApplication.Migrations
             modelBuilder.Entity("WebApplication.Models.Friend", b =>
                 {
                     b.Navigation("Demands");
-
-                    b.Navigation("Friends");
                 });
 #pragma warning restore 612, 618
         }
