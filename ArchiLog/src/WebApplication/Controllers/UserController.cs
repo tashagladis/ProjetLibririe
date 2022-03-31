@@ -1,6 +1,7 @@
 ﻿using APILibrary.Core.Attributs.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -137,6 +138,33 @@ namespace WebApplication.Controllers
             var results = _context.Set<Friend>()
                 .Where(item => item.Username == me)
                 .Select(item => new { invitations = item.Demands });
+
+            return Ok(results);
+        }
+
+
+        [HttpGet("mydatas")]
+        public virtual async Task<ActionResult<RegisterModel>> Mydatas()
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+            var results = await _context.Set<RegisterModel>()
+                .Where(item => item.Login == me)
+                .ToListAsync();
+
+            return Ok(results);
+        }
+
+
+
+        [HttpGet("yourdatas/{user}")]
+        public virtual async Task<ActionResult<RegisterModel>> YourDatas([FromRoute] string user)
+        {
+
+            var results = await _context.Set<RegisterModel>()
+                .Where(item => item.Login == user)
+                .ToListAsync();
 
             return Ok(results);
         }

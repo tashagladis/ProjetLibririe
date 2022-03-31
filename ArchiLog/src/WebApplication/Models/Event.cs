@@ -22,15 +22,25 @@ namespace WebApplication.Models
         [Required]
         public string City { get; set; }
 
+        [Required]
+        public string Hour { get; set; }
+
+
         [DataType(DataType.Date)]
         [Column(TypeName = "Date")]
         public DateTime EventDate { get; set; }
 
         [DataType(DataType.Date)]
         [Column(TypeName = "Date")]
-        public DateTime Date = DateTime.Now;
+        public DateTime Date { get; set; } 
+
+        public string Creator { get; set; }
 
         public ICollection<RegisterModel> EventUsers { get; set; }
+
+        public string ImageType { get; set; }
+
+        public string ImageBasePath { get; set; }
 
     }
 }
