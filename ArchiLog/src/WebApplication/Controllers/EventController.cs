@@ -74,5 +74,41 @@ namespace WebApplication.Controllers
             return Ok(ToJsonList(results));
         }
 
+        [HttpPost ("addmetoevent/{eventId}")]
+        public virtual async Task<ActionResult<Event>> YourAddToList([FromRoute] int eventId)
+        {
+
+            var result = await _context.Set<Event>()
+                .Where(item => item.ID == eventId)             
+                .FirstOrDefaultAsync();
+
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var login = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (login == null)
+                return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
+
+            var me = await _context.Set<RegisterModel>().FirstOrDefaultAsync(item => item.Login == login);
+
+
+           
+                result.EventUsers.Add(me);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(result);
+        }
+
+        [HttpGet("usersofevent/{eventId}")]
+        public virtual async Task<ActionResult<Event>> UserOfEvent([FromRoute] int eventId)
+        {
+
+            var result = _context.Set<Event>()
+                .Where(item => item.ID == eventId)
+                .Select(item => new { participants = item.EventUsers});
+
+            return Ok(result);
+        }
+
     }
 }

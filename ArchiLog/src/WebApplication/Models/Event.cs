@@ -36,7 +36,8 @@ namespace WebApplication.Models
 
         public string Creator { get; set; }
 
-        public ICollection<RegisterModel> EventUsers { get; set; }
+        public ICollection<RegisterModel> EventUsers { get; } =
+          new HashSet<RegisterModel>();
 
         public string ImageType { get; set; }
 

@@ -77,7 +77,8 @@ namespace WebApplication.Controllers
 
             var results = _context.Set<Friend>()
                  .Where(item => item.Username == me)
-                .Select(item => new { friends = item.Friends });
+                .Select(item => new { friends = item.Friends })
+                ;
 
             return Ok(results);
         }
@@ -101,7 +102,9 @@ namespace WebApplication.Controllers
 
             var me = _context.Set<RegisterModel>().FirstOrDefault(item => item.Login == login);
 
-            var friend = _context.Set<Friend>().FirstOrDefault(item => item.Username == user);
+            var friend = _context.Set<Friend>()
+                .Include(item => item.Demands)
+                .FirstOrDefault(item => item.Username == user);
 
             if(friend == null)
             {
@@ -117,7 +120,10 @@ namespace WebApplication.Controllers
             if (userFind != null)
             {
                 friend.Demands.Add(me);
+
             }
+            _context.Update(friend);
+
             await _context.SaveChangesAsync();
 
             return Ok(friend);
@@ -167,6 +173,26 @@ namespace WebApplication.Controllers
                 .ToListAsync();
 
             return Ok(results);
+        }
+
+        [HttpGet("demandsend/{user}")]
+        public virtual async Task<ActionResult<bool>> demandsend([FromRoute] string user)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+            var result = false;
+
+           var results = _context.Set<Friend>()
+                .Include(item => item.Demands)
+                .FirstOrDefault(item => item.Username == user);
+
+            foreach (var res in results.Demands)
+            {
+                if (res.Login == me)
+                    result = true;
+            }
+
+            return Ok(result);
         }
 
 
