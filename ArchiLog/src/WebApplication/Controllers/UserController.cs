@@ -43,8 +43,10 @@ namespace WebApplication.Controllers
             if (me == null)
             {
                 me = new Friend();
+                
                 var userToAdd = new Link();
                 userToAdd.Name = userFind.Login;
+                userToAdd.ImageBasePath = userFind.ImageBasePath;
                 me.Friends.Add(userToAdd);
                 me.Demands.Remove(userFind);
                 _context.Add(me);
@@ -55,11 +57,15 @@ namespace WebApplication.Controllers
             {
                 var userToAdd = new Link();
                 userToAdd.Name = userFind.Login;
+                userToAdd.ImageBasePath = userFind.ImageBasePath;
                 me.Friends.Add(userToAdd);
                 me.Demands.Remove(userFind);
                 await _context.SaveChangesAsync();
 
             }
+
+
+     
 
             return Ok(me);
         }
@@ -76,7 +82,7 @@ namespace WebApplication.Controllers
                 return BadRequest(new { Message = $"Vous n'êtes peut-être pas connecté" });
 
             var results = _context.Set<Friend>()
-                 .Where(item => item.Username == me)
+                .Where(item => item.Username == me)
                 .Select(item => new { friends = item.Friends })
                 ;
 
@@ -185,13 +191,36 @@ namespace WebApplication.Controllers
            var results = _context.Set<Friend>()
                 .Include(item => item.Demands)
                 .FirstOrDefault(item => item.Username == user);
-
-            foreach (var res in results.Demands)
+            if (results != null)
             {
-                if (res.Login == me)
-                    result = true;
+                foreach (var res in results.Demands)
+                {
+                    if (res.Login == me)
+                        result = true;
+                }
             }
+            return Ok(result);
+        }
 
+
+        [HttpGet("demandaccept/{user}")]
+        public virtual async Task<ActionResult<bool>> demandaccept([FromRoute] string user)
+        {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
+            var result = false;
+
+            var results = _context.Set<Friend>()
+                 .Include(item => item.Friends)
+                 .FirstOrDefault(item => item.Username == user);
+            if (results != null)
+            {
+                foreach (var res in results.Friends)
+                {
+                    if (res.Name == me)
+                        result = true;
+                }
+            }
             return Ok(result);
         }
 

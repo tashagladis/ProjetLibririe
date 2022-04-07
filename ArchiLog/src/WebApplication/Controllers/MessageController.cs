@@ -91,11 +91,12 @@ namespace WebApplication.Controllers
 
 
         [HttpGet("users")]
-        public virtual List<string> ListOfUsers()
+        public virtual List<RegisterModel> ListOfUsers()
         {
             var claimsIdentity = this.User.Identity as ClaimsIdentity;
             var me = claimsIdentity.FindFirst(ClaimTypes.Name)?.Value;
-
+            var listUsers = new List<RegisterModel>();
+            // me = me.ToLower();
             var results =  _context.Set<Message>()
                 .Where(item => item.Reciever == me || item.Sender == me)
                 .ToList();
@@ -104,7 +105,7 @@ namespace WebApplication.Controllers
 
             foreach(var message in results)
             {
-                message.Sender = message.Sender.ToLower();
+                //message.Sender = message.Sender;
 
                 //Verifier si l'élément est different de celui connecté
                 if (message.Sender != me)
@@ -140,8 +141,23 @@ namespace WebApplication.Controllers
                 }
 
             }
+            if(users != null)
+            {
+                var result = new RegisterModel();
 
-            return users;
+
+                foreach (var user in users)
+                {
+                   result = _context.Set<RegisterModel>()
+                  .Where(item => item.Login == user)
+                  .FirstOrDefaultAsync().Result;
+                   listUsers.Add(result);
+
+                }
+            }
+            
+
+            return listUsers;
         }
     }
 }
